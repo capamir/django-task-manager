@@ -12,6 +12,8 @@
                         
                         {% if request.user.id == project.created_by.id %}
                         <a href="{% url 'projects:update-project' project.id %}" class="btn btn--sub btn--lg">Update Project </a>
+                        {% comment %} <a href="{% url 'projects:create-task' %}" class="btn btn--sub btn--lg">Create Task </a> {% endcomment %}
+
                         {% endif %}
                     </div>
                 </div>
@@ -27,21 +29,68 @@
                 <div class="comments">
                     
                     {% if request.user.is_authenticated %}
-                    <form class="form" action="{% url 'projects:project' project.id %}" method="POST">
+                    <form class="form" action="" method="POST">
                         {% csrf_token %}
-                        {% for field in form %}
                         <div class="form__field">
-                            <label for="formInput#textarea">{{field.label}}</label>
-                            {{field}}
-                        </div>
-                        {% endfor %}
-                        <input class="btn btn--sub btn--lg" type="submit" value="Add Review" />
+                            <label for="formInput#text">assign to: </label>
+                            <input
+                              class="input input--text"
+                              id="formInput#text"
+                              type="text"
+                              name="user_id"
+                              placeholder="Enter person's id..."
+                            />
+                          </div>
+
+                          <div class="form__field">
+                            <label for="formInput#text">title: </label>
+                            <input
+                              class="input input--text"
+                              id="formInput#text"
+                              type="text"
+                              name="title"
+                              placeholder="Enter title of task..."
+                            />
+                          </div>
+                          <div class="form__field">
+                            <label for="formInput#text">description: </label>
+                            <input
+                              class="input input--text"
+                              id="formInput#text"
+                              type="text"
+                              name="description"
+                              placeholder="Enter description..."
+                            />
+                          </div>
+                        
+                        <input class="btn btn--sub btn--lg" type="submit" value="Add Task" />
                     </form>
                     {% else %}
                     <a href="{% url 'accounts:user_login' %}?next={{request.path}}">Please login to leave a review</a>
                     {% endif %}
 
-                    <div class="commentList">
+                    <div class="devInfo">
+                        <h3 class="devInfo__title">Tasks</h3>
+                        <div class="grid grid--two">
+                            {% for task in tasks %}
+                            <div class="column">
+                                <div class="card project">
+                                    <a href="{% url 'projects:task-details' task.id %}" class="project">
+                                        
+                                        <div class="card__body">
+                                            <h3 class="project__title">{{task.title}}</h3>
+                                            
+                                        </div>
+                                    </a>
+                                </div>
+                            </div>
+                            {% endfor %}
+    
+    
+                        </div>
+                    </div>
+
+                    {% comment %} <div class="commentList">
                         {% for review in project.review_set.all %}
                         {% if review.body %}
                         <div class="comment">
@@ -60,7 +109,7 @@
                         {% endif %}
                         {% endfor %}
 
-                    </div>
+                    </div> {% endcomment %}
                 </div>
             </div>
         </div>

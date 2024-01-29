@@ -2,9 +2,9 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.views import View
 from django.views.generic.edit import UpdateView
 from django.urls import reverse_lazy
-from .models import Project
-from .forms import ProjectUpdateForm, ProjectCreationForm
-
+from .models import Project, Task
+from .forms import ProjectUpdateForm, ProjectCreationForm, TaskCreateForm
+from accounts.models import User
 # Create your views here.
 
 class ProjectsView(View):
@@ -42,22 +42,46 @@ class ProjectsView(View):
             return render(request, self.template_name, context)
 
 class ProjectDetailView(View):
-    template_name = 'projects/single-project.html' 
+    template_name = 'projects/single-project.html'
+    form_class = TaskCreateForm
 
-    def get(self, request, pk, *args, **kwargs):
+    def get(self, request, *args, **kwargs):
         # Get the project by its ID or return a 404 response if not found
-        project = get_object_or_404(Project, id=pk)
+        project = get_object_or_404(Project, id=self.kwargs['pk'])
+        # Get tasks related to the project
+        project_tasks = Task.objects.filter(project=project)
 
-        # Pass the project to the template
+        # Pass the project and the form to the template
         context = {
-            'project': project
+            'project': project,
+            'tasks': project_tasks,
+            'form': self.form_class(),  # Pass the project to the form
         }
 
         # Render the template with the context
         return render(request, self.template_name, context)
 
-class ProjectCreateView(View):
-    template_name = 'projects/project_form.html'
+    def post(self, request, *args, **kwargs):
+        project = get_object_or_404(Project, id=self.kwargs['pk'])
+        form = self.form_class(request.POST)
+
+        if form.is_valid():
+            # Save the new task with the current project
+            new_task = form.save(commit=False)
+            new_task.project = project
+            user = get_object_or_404(User, id=form.cleaned_data['user_id'])
+            new_task.assigned_to = user
+
+            new_task.save()
+
+            return redirect('projects:project', pk=project.pk)  # Redirect to the project detail page upon successful task creation
+        else:
+            # If the form is not valid, render the template again with the form and display validation errors
+            context = {
+                'project': project,
+                'form': task_creation_form,
+            }
+            return render(request, self.template_name, context)
 
 class ProjectUpdateView(UpdateView):
     model = Project
@@ -68,3 +92,29 @@ class ProjectUpdateView(UpdateView):
     def form_valid(self, form):
         # Optionally, you can add logic here for additional processing when the form is valid
         return super().form_valid(form)
+
+class TaskDetailsView(View):
+    template_name = 'projects/task-details.html'
+
+    def get(self, request, *args, **kwargs):
+        # Get the project by its ID or return a 404 response if not found
+        task = get_object_or_404(Task, id=self.kwargs['pk'])
+
+        context = {
+            'task': task,
+        }
+
+        # Render the template with the context
+        return render(request, self.template_name, context)
+
+class TaskCompleteView(View):
+    def get(self, request, *args, **kwargs):
+        task_id = self.kwargs.get('pk')
+        task = get_object_or_404(Task, id=task_id)
+
+        # Update the task's 'completed' field to True
+        task.completed = True
+        task.save()
+
+        # Redirect back to the project detail page or any other desired page
+        return redirect('projects:project', pk=task.project.pk)
