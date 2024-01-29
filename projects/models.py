@@ -6,6 +6,7 @@ class Project(models.Model):
     title = models.CharField(max_length=255)
     description = models.TextField()
     created_by = models.ForeignKey(User, on_delete=models.CASCADE)
+    created = models.DateTimeField(auto_now_add=True)
 
 class Task(models.Model):
     assigned_to = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -13,6 +14,8 @@ class Task(models.Model):
     title = models.CharField(max_length=255)
     description = models.TextField()
     completed = models.BooleanField(default=False)
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
 
 class Review(models.Model):
     project = models.ForeignKey(Project, on_delete=models.CASCADE)
@@ -21,3 +24,4 @@ class Review(models.Model):
     feedback = models.TextField()
     reply = models.ForeignKey('self', on_delete=models.CASCADE, related_name='rcomments', blank=True, null=True)
     is_reply = models.BooleanField(default=False)
+    created = models.DateTimeField(auto_now_add=True)
