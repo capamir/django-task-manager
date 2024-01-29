@@ -7,17 +7,14 @@
     <div class="container">
         <div class="layout">
             <div class="column column--1of3">
-                <h3 class="singleProject__subtitle">Tools & Stacks</h3>
-                <div class="singleProject__toolStack">
-                    {% comment %} {% for tag in project.tags.all %}
-                    <span class="tag tag--pill tag--sub tag--lg">
-                        <small>{{tag}}</small>
-                    </span>
-                    {% endfor %} {% endcomment %}
-
+                <div class="card text-center">
+                    <div class="card__body dev">
+                        
+                        {% if request.user.id == project.created_by.id %}
+                        <a href="{% url 'projects:update-project' project.id %}" class="btn btn--sub btn--lg">Update Project </a>
+                        {% endif %}
+                    </div>
                 </div>
-
-                
             </div>
             <div class="column column--2of3">
                 <a href="{% url 'accounts:user-profile' project.created_by.id  %}"

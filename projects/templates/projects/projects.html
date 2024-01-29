@@ -7,9 +7,10 @@
       <div class="hero-section__box">
         <h2>See Your <span>Projects</span></h2>
       </div>
-
+      {% if request.user.is_professor %}
       <div class="hero-section__search">
         <form id="searchForm" class="form" action="" method="post">
+          {% csrf_token %}
           <div class="form__field">
             <label for="formInput#search">Create New Project </label>
             <input
@@ -24,6 +25,7 @@
           <input class="btn btn--sub btn--lg" type="submit" value="Submit" />
         </form>
       </div>
+      {% endif %}
     </div>
   </section>
   <!-- Search Result: DevList -->
